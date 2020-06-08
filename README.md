@@ -1,0 +1,2 @@
+# PySerial_Monitaering
+ PySerialを用いて値を取得しそれをグラフ化する
