@@ -14,14 +14,30 @@ ser_port = ""
 # Serial speed.
 ser_speed = 115200
 
-""" Const value setting. """
-# Define the dictionary type to be sent to ambient.
-# The dictionary type used depends on the number of data.
-# (The minimum is 1, the maximum is 4)
-cmd_list = ("{'d1':{}}",
-            "{'d1':{}, 'd2':{}}",
-            "{'d1':{}, 'd2':{}, 'd3':{}}",
-            "{'d1':{}, 'd2':{}, 'd3':{}, 'd4': {}}")
+def ambient_send(amb, datalist):
+    """ 
+        Send data to the ambient.
+        Arguments : Ambient class (Ambient), data to be sent (list)
+        return    : None
+    """
+    # Define the dictionary type to be sent to ambient.
+    # The dictionary type used depends on the number of data.
+    # (The minimum is 1, the maximum is 4)
+    cmd_list = ("{'d1':{}}",
+                "{'d1':{}, 'd2':{}}",
+                "{'d1':{}, 'd2':{}, 'd3':{}}",
+                "{'d1':{}, 'd2':{}, 'd3':{}, 'd4': {}}")
+
+    # Creating the data to be sent
+    senddata = cmd_list[datalist.len() - 1].format(datalist)
+    senddata = ast.literal_eval(senddata)
+    # for debug
+    print(senddata)
+
+    # ambient send execute.
+    res = amb.send(senddata)
+    # send Response. (HTTP stat code)
+    print("Send Response : ", res)
 
 def main(): 
     """ Main sequence """
@@ -44,6 +60,9 @@ def main():
             print("list length : ", readdata.len())
             print("The length of the expected list. 0 < list < 5")
             sys.exit(1)
+        ambient_send(amb, readdata)
+
+        
 
 
 
