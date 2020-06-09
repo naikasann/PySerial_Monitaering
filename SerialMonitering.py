@@ -20,7 +20,7 @@ ser_speed = 115200
 # plot data max size
 max_data = 100
 # data count(max : 4)
-data_count = 4
+data_count = 3
 
 def ambient_send(amb, datalist):
     """ 
@@ -31,25 +31,27 @@ def ambient_send(amb, datalist):
     # Define the dictionary type to be sent to ambient.
     # The dictionary type used depends on the number of data.
     # (The minimum is 1, the maximum is 4)
-    cmd_list = ("{'d1':{}}",
-                "{'d1':{}, 'd2':{}}",
-                "{'d1':{}, 'd2':{}, 'd3':{}}",
-                "{'d1':{}, 'd2':{}, 'd3':{}, 'd4': {}}")
+    cmd_list = ("{'d1':{0}}",
+                "{'d1':{0}, 'd2':{1}}",
+                """{{"d1":{}, "d2":{}, "d3":{}}}""",
+                "{'d1':{0}, 'd2':{1}, 'd3':{2}, 'd4': {3}}")
 
     # Creating the data to be sent
-    senddata = cmd_list[datalist.len() - 1].format(datalist)
+    senddata = cmd_list[len(datalist)- 1].format(*datalist)
     senddata = ast.literal_eval(senddata)
+
     # for debug
-    print(senddata)
+    #print(senddata)
 
     # ambient send execute.
-    res = amb.send(senddata)
+    # res = amb.send(senddata)
     # send Response. (HTTP stat code)
-    print("Send Response : ", res)
+    #print("Send Response : ", res)
 
 def plot_data(plt_data, axe):
-    data_count = plt_data.len()
+    data_count = len(plt_data)
 
+    # plot graph
     if data_count == 1:
         axe.plot(plt_data, range(max_data))
     elif data_count == 2:
@@ -65,8 +67,9 @@ def plot_data(plt_data, axe):
         axe[1, 0].plot(range(max_data), plt_data[2])
         axe[1, 1].plot(range(max_data), plt_data[3])
 
+    # graph draw
     plt.draw()
-    plt.pause(1)
+    plt.pause(0.01)
     plt.cla()
 
 def main(axe, write_data): 
@@ -83,21 +86,33 @@ def main(axe, write_data):
         # read serial data.
         line = ser.readline()
         # Read the data as a comma-separated list.
-        readdata = line.decode("utf-8").split(",")
+        readdata = line.decode("utf-8").strip().split(",")
         # for debug.
         print(readdata)
+
+        # Update the list.
+        newlist = []
+        for cnt, data in enumerate(readdata):
+            write_data[cnt].append(float(data))
+        for buff_list in write_data:
+            del buff_list[0]
+            newlist.append(buff_list)
+        write_data = newlist
+
         # Check the length of the list. 
         # if : (0 < length < 5) => ok, else : program exit.
-        if not readdata.len() == data_count:
+        if not len(readdata) == data_count:
             print("I'm afraid we received some unexpected data...")
             print("list length : ", readdata.len())
             print("The length of the expected list. expect data :", data_count)
             sys.exit(1)
 
+        plot_data(write_data, axe)
         ambient_send(amb, readdata)
 
 
 if __name__ == "__main__":
+    # Create a graph plotting environment that suits the number of data.#
     if data_count == 1:
         _, axe = plt.subplots()
     elif data_count == 2:
@@ -109,6 +124,7 @@ if __name__ == "__main__":
     else:
         print("It's a value we don't expect.")
         sys.exit(1)
-    """ Const value """
-    write_data = [[0] * max_data for i in range(data_count)]
+    # fill 0 data
+    write_data = [[0.0] * max_data for i in range(data_count)]
+    print("We're ready! Start monitoring...")
     main(axe, write_data)
