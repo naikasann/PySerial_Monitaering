@@ -13,7 +13,7 @@ amb_ch = ""
 amb_key = ""
 
 # Serial port.
-ser_port = ""
+ser_port = "COM5"
 # Serial speed.
 ser_speed = 115200
 
@@ -24,7 +24,7 @@ data_count = 3
 
 def ambient_send(amb, datalist):
     """ 
-        Send data to the ambient.
+        Function  : Send data to the ambient.
         Arguments : Ambient class (Ambient), data to be sent (list)
         return    : None
     """
@@ -41,43 +41,85 @@ def ambient_send(amb, datalist):
     senddata = ast.literal_eval(senddata)
 
     # for debug
-    #print(senddata)
+    # print(senddata)
 
     # ambient send execute.
     res = amb.send(senddata)
     # send Response. (HTTP stat code)
     print("Send Response : ", res)
 
-def plot_data(plt_data, axe):
-    data_count = len(plt_data)
+def plot_data(plt_data, ax, line_obj_list):
+    """
+        Function  : Set the drawing area of a graph.
+        Arguments : Plotting Graph Data (list), Drawing Control (Matlabplot's Axes class), Drawing Line Graphs(Matlabplot's Line object)
+        return    : None
+    """
+    # Call the line object and set the data.
+    for cnt, line_obj in enumerate(line_obj_list):
+        line_obj.set_data(range(max_data), plt_data[cnt])
 
-    # plot graph
+    # The drawing area of y-axis is set
+    # by referring to the maximum and minimum values of the list.
     if data_count == 1:
-        axe.plot(plt_data, range(max_data))
+        ax.set_xlim(min(plt_data) - 5, max(plt_data) + 5)
     elif data_count == 2:
-        axe[0].plot(range(max_data), plt_data[0])
-        axe[1].plot(range(max_data), plt_data[1])
+        ax[0].set_ylim(min(plt_data[0]) - 5, max(plt_data[0]) + 5)
+        ax[1].set_ylim(min(plt_data[1]) - 5, max(plt_data[1]) + 5)
     elif data_count == 3:
-        axe[0, 0].plot(range(max_data), plt_data[0])
-        axe[0, 1].plot(range(max_data), plt_data[1])
-        axe[1, 0].plot(range(max_data), plt_data[2])
+        ax[0, 0].set_ylim(min(plt_data[0]) - 5, max(plt_data[0]) + 5)
+        ax[0, 1].set_ylim(min(plt_data[1]) - 5, max(plt_data[1]) + 5)
+        ax[1, 0].set_ylim(min(plt_data[2]) - 5, max(plt_data[2]) + 5)
     elif data_count == 4:
-        axe[0, 0].plot(range(max_data), plt_data[0])
-        axe[0, 1].plot(range(max_data), plt_data[1])
-        axe[1, 0].plot(range(max_data), plt_data[2])
-        axe[1, 1].plot(range(max_data), plt_data[3])
-
-    # graph draw
-    plt.draw()
+        ax[0, 0].set_ylim(min(plt_data[0]) - 5, max(plt_data[0]) + 5)
+        ax[0, 1].set_ylim(min(plt_data[1]) - 5, max(plt_data[1]) + 5)
+        ax[1, 0].set_ylim(min(plt_data[2]) - 5, max(plt_data[2]) + 5)
+        ax[1, 1].set_ylim(min(plt_data[3]) - 5, max(plt_data[3]) + 5)
+    # for plot.
     plt.pause(0.01)
-    plt.cla()
 
-def main(axe, write_data): 
+def main(): 
     """ Main sequence """
     # setting ambient info.
     amb = ambient.Ambient(amb_ch, amb_key)
     # Setting Serial info.
     ser = serial.Serial(ser_port, ser_speed)
+    # fill 0 data
+    write_data = [[0.0] * max_data for i in range(data_count)]
+
+    # Create a graph plotting environment that suits the number of data.
+    # Store line objects in a list. (You could write better than that... Lack of skill.)
+    line_obj_list = []
+    if data_count == 1:
+        _, ax = plt.subplots()
+        buff, = ax.plot(write_data, range(max_data))
+        line_obj_list.append(buff)
+    elif data_count == 2:
+        _, ax = plt.subplots(2, 1, sharex="col", sharey="row")
+        buff, = ax[0].plot(range(max_data), write_data[0])
+        line_obj_list.append(buff)
+        buff, = ax[1].plot(range(max_data), write_data[1])
+        line_obj_list.append(buff)
+    elif data_count == 3:
+        _, ax = plt.subplots(2, 2, sharex="col", sharey="row")
+        buff, = ax[0, 0].plot(range(max_data), write_data[0])
+        line_obj_list.append(buff)
+        buff, = ax[0, 1].plot(range(max_data), write_data[1])
+        line_obj_list.append(buff)
+        buff, = ax[1, 0].plot(range(max_data), write_data[2])
+        line_obj_list.append(buff)
+    elif data_count == 4:
+        _, ax = plt.subplots(2, 2, sharex="col", sharey="row")
+        buff, = ax[0, 0].plot(range(max_data), write_data[0])
+        line_obj_list.append(buff)
+        buff, = ax[0, 1].plot(range(max_data), write_data[1])
+        line_obj_list.append(buff)
+        buff, = ax[1, 0].plot(range(max_data), write_data[2])
+        line_obj_list.append(buff)
+        buff, = ax[1, 1].plot(range(max_data), write_data[3])
+        line_obj_list.append(buff)
+    else:
+        print("It's a value we don't expect.")
+        sys.exit(1)
 
     # read Serial (Endless.)
     while True:
@@ -88,7 +130,7 @@ def main(axe, write_data):
         # Read the data as a comma-separated list.
         readdata = line.decode("utf-8").strip().split(",")
         # for debug.
-        print(readdata)
+        print("read data :",readdata)
 
         # Update the list.
         newlist = []
@@ -98,6 +140,7 @@ def main(axe, write_data):
             del buff_list[0]
             newlist.append(buff_list)
         write_data = newlist
+        del newlist
 
         # Check the length of the list. 
         # if : (0 < length < 5) => ok, else : program exit.
@@ -107,24 +150,11 @@ def main(axe, write_data):
             print("The length of the expected list. expect data :", data_count)
             sys.exit(1)
 
-        plot_data(write_data, axe)
+        plot_data(write_data, ax, line_obj_list)
+
         ambient_send(amb, readdata)
 
 
 if __name__ == "__main__":
-    # Create a graph plotting environment that suits the number of data.#
-    if data_count == 1:
-        _, axe = plt.subplots()
-    elif data_count == 2:
-        _, axe = plt.subplots(2, 1, sharex="col", sharey="row")
-    elif data_count == 3:
-        _, axe = plt.subplots(2, 2, sharex="col", sharey="row")
-    elif data_count == 4:
-        _, axe = plt.subplots(2, 2, sharex="col", sharey="row")
-    else:
-        print("It's a value we don't expect.")
-        sys.exit(1)
-    # fill 0 data
-    write_data = [[0.0] * max_data for i in range(data_count)]
     print("We're ready! Start monitoring...")
-    main(axe, write_data)
+    main()
