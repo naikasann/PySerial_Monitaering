@@ -13,7 +13,7 @@ amb_ch = ""
 amb_key = ""
 
 # Serial port.
-ser_port = "COM5"
+ser_port = ""
 # Serial speed.
 ser_speed = 115200
 
