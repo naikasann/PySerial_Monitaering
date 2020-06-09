@@ -50,6 +50,21 @@ PySerialを用いて値を取得しそれをグラフ化する
 
 ---
 
+## 動作確認環境
+
+``` 環境.
+Windows10
+|- Python 3.7.6
+|   |- pyserial 3.4
+|   |- matplotlib 3.1.37
+|   |- ambient 0.1.4
+Microbit
+```
+
+今後raspberrypieに接続して動作するのか確認を行う。
+
+---
+
 ## 参考文献
 
 1. [Ambient – IoTデーター可視化サービス](https://ambidata.io/)
@@ -58,3 +73,6 @@ PySerialを用いて値を取得しそれをグラフ化する
 4. [python3 文字列を辞書に変換 - Qiita](https://qiita.com/lamplus/items/b5d8872c76757b2c0dd9)
 5. [Pythonでリスト（配列）の要素を削除するclear, pop, remove, del | note.nkmk.me](https://note.nkmk.me/python-list-clear-pop-remove-del/)
 6. [micro:bitとAmbientで社内の温度、環境光を可視化した - Qiita](https://qiita.com/m_ryusei/items/ec7b6c97f5f4929b43be)
+7. [matplotlib　グラフの設定 - Remrinのpython攻略日記](http://python-remrin.hatenadiary.jp/entry/2017/05/27/114816)
+8. [Pythonでリストの最大値・最小値から順にn個の要素を取得 | note.nkmk.me](https://note.nkmk.me/python-max-min-heapq-nlargest-nsmallest/)
+9. [matplotlibでリアルタイム描画 - Qiita](https://qiita.com/hausen6/items/b1b54f7325745ae43e47)
