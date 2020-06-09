@@ -44,9 +44,9 @@ def ambient_send(amb, datalist):
     #print(senddata)
 
     # ambient send execute.
-    # res = amb.send(senddata)
+    res = amb.send(senddata)
     # send Response. (HTTP stat code)
-    #print("Send Response : ", res)
+    print("Send Response : ", res)
 
 def plot_data(plt_data, axe):
     data_count = len(plt_data)
